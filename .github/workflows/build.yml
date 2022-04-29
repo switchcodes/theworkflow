@@ -36,4 +36,12 @@ jobs:
       with:
         name: Build
         path: build
+    - name: Upload build to itch.io
+      uses: manleydev/butler-publish-itchio-action@v1.0.2
+      env:
+        BUTLER_CREDENTIALS: ${{ secrets.BUTLER_CREDENTIALS }}
+        CHANNEL: web_latest
+        ITCH_GAME: theworkflow
+        ITCH_USER: bencebalazs
+        PACKAGE: build
 
