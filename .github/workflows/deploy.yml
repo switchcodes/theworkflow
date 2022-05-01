@@ -1,0 +1,29 @@
+name: Unity Build and Deploy
+
+on:
+  repository_dispatch:
+    types:
+      - TRIGGER_ITCHIO_DEPLOY
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download build from unity
+      shell: bash
+      env:
+        UNITY_API_KEY: ${{ secrets.UNITY_API_KEY }}
+      run : |
+        curl -L -X GET "https://build-api.cloud.unity3d.com/api/v1/orgs/9071013101541/projects/4c9166b8-2e99-4c3b-a30b-d385091ce160/buildtargets/default-webgl/builds" -H "Authorization: Basic $UNITY_API_KEY" -o res.json
+        sed 's/,/,\n/g' res.json > res2.json
+        curl "$(cat res2.json | grep 'https[^\",]*\.zip' -o -m 1)" -o build.zip
+    - name: Upload build to itch.io
+      uses: manleydev/butler-publish-itchio-action@v1.0.3
+      env:
+        BUTLER_CREDENTIALS: ${{ secrets.BUTLER_CREDENTIALS }}
+        CHANNEL: web_latest
+        ITCH_GAME: theworkflow
+        ITCH_USER: bencebalazs
+        PACKAGE: build.zip
+
